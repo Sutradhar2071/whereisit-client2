@@ -1,9 +1,8 @@
 import React from "react";
-import { NavLink } from "react-router";
+import { NavLink } from "react-router-dom";
 
 const Navbar = () => {
-  // Dummy user status - replace with real Firebase user later
-  const user = null; // Example: const { user, logout } = useContext(AuthContext);
+  const user = null;
 
   const links = (
     <>
@@ -61,7 +60,7 @@ const Navbar = () => {
   );
 
   return (
-    <div className="navbar bg-base-100 shadow-sm">
+    <div className="navbar bg-base-100 shadow-sm fixed top-0 z-50 w-full">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -106,12 +105,26 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1 space-x-1">{links}</ul>
       </div>
 
-      <div className="navbar-end">
-        {/* Conditional Login / Logout - To be implemented later */}
+      <div className="navbar-end space-x-2">
         {!user ? (
-          <NavLink to="/login" className="btn btn-sm">
-            Login
-          </NavLink>
+          <>
+            <NavLink
+              to="/login"
+              className={({ isActive }) =>
+                `btn btn-sm ${isActive ? "btn-primary text-white" : ""}`
+              }
+            >
+              Login
+            </NavLink>
+            <NavLink
+              to="/register"
+              className={({ isActive }) =>
+                `btn btn-sm btn-outline ${isActive ? "border-primary text-primary font-bold" : ""}`
+              }
+            >
+              Register
+            </NavLink>
+          </>
         ) : (
           <div className="dropdown dropdown-end">
             <div
@@ -134,7 +147,7 @@ const Navbar = () => {
                 <p className="font-semibold">{user.displayName}</p>
               </li>
               <li>
-                <button>Logout</button> {/* Replace with logout() later */}
+                <button>Logout</button>
               </li>
             </ul>
           </div>
