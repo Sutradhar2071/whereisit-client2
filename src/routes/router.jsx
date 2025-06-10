@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
 import AddItem from "../pages/AddItem";
 import PrivateRoute from "./PrivateRoute";
+import AllItems from "../pages/AllItemsPage";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: '/add-item',
         element: <PrivateRoute><AddItem></AddItem></PrivateRoute>
+      },
+      {
+        path: '/lost-found-items',
+        element: <AllItems></AllItems>
       }
     ],
   },
