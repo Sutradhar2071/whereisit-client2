@@ -1,9 +1,14 @@
 import React from 'react';
+import ExtraSectionOne from './ExtraSectionOne';
+import ExtraSectionTwo from './ExtraSectionTwo';
+import HeroSection from './HeroSection';
 
 const Home = () => {
     return (
         <div>
-            <h2 className="text-3xl">hello home</h2>
+            <HeroSection></HeroSection>
+            <ExtraSectionOne></ExtraSectionOne>
+            <ExtraSectionTwo></ExtraSectionTwo>
         </div>
     );
 };
