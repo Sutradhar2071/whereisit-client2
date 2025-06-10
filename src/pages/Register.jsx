@@ -1,6 +1,10 @@
-import React, { useState } from "react";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router";
+import React, { useState, useContext } from "react";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../providers/AuthProvider";
+
+const MySwal = withReactContent(Swal);
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,10 +14,27 @@ const Register = () => {
     password: "",
   });
 
+  const { createUser, updateUserProfile } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const showError = (message) => {
+    MySwal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: message,
+    });
+  };
+
+  const showSuccess = (message) => {
+    MySwal.fire({
+      icon: "success",
+      title: "Success!",
+      text: message,
+    });
   };
 
   const validatePassword = (password) => {
@@ -22,33 +43,35 @@ const Register = () => {
     const isLengthValid = password.length >= 6;
 
     if (!hasUpperCase) {
-      toast.error("Password must contain at least one uppercase letter.");
+      showError("Password must contain at least one uppercase letter.");
       return false;
     }
     if (!hasLowerCase) {
-      toast.error("Password must contain at least one lowercase letter.");
+      showError("Password must contain at least one lowercase letter.");
       return false;
     }
     if (!isLengthValid) {
-      toast.error("Password must be at least 6 characters long.");
+      showError("Password must be at least 6 characters long.");
       return false;
     }
 
     return true;
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-
     const { name, email, photoURL, password } = formData;
 
-    if (!validatePassword(password)) {
-      return;
-    }
+    if (!validatePassword(password)) return;
 
-    // Dummy simulate register success (replace with Firebase or your logic)
-    toast.success("Successfully registered!");
-    navigate("/login");
+    try {
+      await createUser(email, password);
+      await updateUserProfile(name, photoURL);
+      showSuccess("Registration successful!");
+      navigate("/login");
+    } catch (error) {
+      showError(error.message);
+    }
   };
 
   return (
@@ -60,72 +83,59 @@ const Register = () => {
       <form onSubmit={handleRegister} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label htmlFor="name" className="block mb-2 text-sm">
-              Name
-            </label>
+            <label htmlFor="name" className="block mb-2 text-sm">Name</label>
             <input
               type="text"
               name="name"
               required
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800"
+              className="w-full px-3 py-2 border rounded-md"
               placeholder="Your name"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block mb-2 text-sm">
-              Email address
-            </label>
+            <label htmlFor="email" className="block mb-2 text-sm">Email address</label>
             <input
               type="email"
               name="email"
               required
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800"
-              placeholder="leroy@jenkins.com"
+              className="w-full px-3 py-2 border rounded-md"
+              placeholder="your@email.com"
             />
           </div>
           <div>
-            <label htmlFor="photoURL" className="block mb-2 text-sm">
-              Photo URL
-            </label>
+            <label htmlFor="photoURL" className="block mb-2 text-sm">Photo URL</label>
             <input
               type="text"
               name="photoURL"
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800"
+              className="w-full px-3 py-2 border rounded-md"
               placeholder="https://example.com/photo.jpg"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block mb-2 text-sm">
-              Password
-            </label>
+            <label htmlFor="password" className="block mb-2 text-sm">Password</label>
             <input
               type="password"
               name="password"
               required
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800"
-              placeholder="*****"
+              className="w-full px-3 py-2 border rounded-md"
+              placeholder="******"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <div>
-            <button
-              type="submit"
-              className="w-full px-8 py-3 font-semibold rounded-md dark:bg-violet-600 dark:text-gray-50"
-            >
-              Register
-            </button>
-          </div>
-          <p className="px-6 text-sm text-center dark:text-gray-600">
+          <button
+            type="submit"
+            className="w-full px-8 py-3 font-semibold rounded-md bg-violet-600 text-white hover:bg-violet-700"
+          >
+            Register
+          </button>
+          <p className="px-6 text-sm text-center text-gray-600">
             Already have an account?
-            <a
-              href="/login"
-              className="hover:underline dark:text-violet-600 ml-1"
-            >
+            <a href="/login" className="hover:underline text-violet-600 ml-1">
               Login
             </a>
           </p>
