@@ -1,12 +1,17 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../providers/AuthProvider";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const Login = () => {
   const { signIn, googleSignIn } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+
+  const from = location.state?.from?.pathname || "/";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,7 +29,7 @@ const Login = () => {
           showConfirmButton: false,
           timer: 1500,
         });
-        navigate("/");
+        navigate(from, { replace: true });
       })
       .catch((error) => {
         Swal.fire({
@@ -44,7 +49,7 @@ const Login = () => {
           showConfirmButton: false,
           timer: 1500,
         });
-        navigate("/");
+        navigate(from, { replace: true });
       })
       .catch((error) => {
         Swal.fire({
