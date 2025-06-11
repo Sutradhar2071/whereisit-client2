@@ -45,44 +45,6 @@ const Navbar = () => {
           Lost & Found Items
         </NavLink>
       </li>
-      <li>
-        <NavLink
-          to="/add-item"
-          className={({ isActive }) =>
-            isActive
-              ? "underline text-primary font-semibold"
-              : "hover:underline"
-          }
-        >
-          Add Item
-        </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/recovered-items"
-          className={({ isActive }) =>
-            isActive
-              ? "underline text-primary font-semibold"
-              : "hover:underline"
-          }
-        >
-          Recovered Items
-        </NavLink>
-      </li>
-      {user && (
-        <li>
-          <NavLink
-            to="/my-items"
-            className={({ isActive }) =>
-              isActive
-                ? "underline text-primary font-semibold"
-                : "hover:underline"
-            }
-          >
-            My Items
-          </NavLink>
-        </li>
-      )}
     </>
   );
 
@@ -99,40 +61,30 @@ const Navbar = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
             </svg>
           </label>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-          >
+          <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
             {navLinks}
-            {!user && (
+            {!user ? (
               <>
-                <li>
-                  <NavLink to="/login">Login</NavLink>
-                </li>
-                <li>
-                  <NavLink to="/register">Register</NavLink>
-                </li>
+                <li><NavLink to="/login">Login</NavLink></li>
+                <li><NavLink to="/register">Register</NavLink></li>
+              </>
+            ) : (
+              <>
+                <li><NavLink to="/add-item">Add Item</NavLink></li>
+                <li><NavLink to="/recovered-items">Recovered Items</NavLink></li>
+                <li><NavLink to="/my-items">My Items</NavLink></li>
+                <li><button onClick={handleLogOut}>Logout</button></li>
               </>
             )}
           </ul>
         </div>
-        <NavLink
-          to="/"
-          className="flex items-center gap-2 text-xl font-bold text-primary"
-        >
-          <img
-            src="https://i.ibb.co/bgCktXkj/5654592.png"
-            alt="Logo"
-            className="w-8 h-8"
-          />
+
+        {/* Logo */}
+        <NavLink to="/" className="flex items-center gap-2 text-xl font-bold text-primary">
+          <img src="https://i.ibb.co/bgCktXkj/5654592.png" alt="Logo" className="w-8 h-8" />
           WhereIsIt
         </NavLink>
       </div>
@@ -142,23 +94,16 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1 gap-2">{navLinks}</ul>
       </div>
 
-      {/* Right: Auth Buttons, Theme Toggle or Profile */}
+      {/* Right: Theme + Auth Controls */}
       <div className="navbar-end gap-3">
-        {/* ✅ Theme Toggle Button */}
         <ThemeChange />
 
         {!user ? (
           <>
-            <NavLink
-              to="/login"
-              className="btn btn-sm border border-primary text-primary hover:bg-primary hover:text-white"
-            >
+            <NavLink to="/login" className="btn btn-sm border border-primary text-primary hover:bg-primary hover:text-white">
               Login
             </NavLink>
-            <NavLink
-              to="/register"
-              className="btn btn-sm btn-outline border border-primary text-primary"
-            >
+            <NavLink to="/register" className="btn btn-sm btn-outline border border-primary text-primary">
               Register
             </NavLink>
           </>
@@ -170,24 +115,19 @@ const Navbar = () => {
               data-tip={user.displayName || "User"}
             >
               <div className="w-10 rounded-full">
-                <img
-                  src={
-                    user.photoURL || "https://i.ibb.co/Yy8Kjb6/avatar.png"
-                  }
-                  alt="user"
-                />
+                <img src={user.photoURL || "https://i.ibb.co/Yy8Kjb6/avatar.png"} alt="user" />
               </div>
             </label>
+
             <ul
               tabIndex={0}
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
-              <li>
-                <p className="font-semibold">{user.displayName}</p>
-              </li>
-              <li>
-                <button onClick={handleLogOut}>Logout</button>
-              </li>
+              <li><p className="font-semibold text-center">{user.displayName}</p></li>
+              <li><NavLink to="/add-item">Add Item</NavLink></li>
+              <li><NavLink to="/recovered-items">Recovered Items</NavLink></li>
+              <li><NavLink to="/my-items">My Items</NavLink></li>
+              <li><button onClick={handleLogOut}>Logout</button></li>
             </ul>
           </div>
         )}

@@ -44,12 +44,11 @@ const ItemDetailsPage = () => {
   };
 
   const handleSubmitRecovery = () => {
-    if (!recoveredLocation) {
+    if (!recoveredLocation.trim()) {
       Swal.fire("Validation Error", "Please enter the recovered location.", "error");
       return;
     }
 
-    // Prepare data to send
     const recoveredData = {
       originalItemId: item._id,
       originalItem: {
@@ -69,18 +68,14 @@ const ItemDetailsPage = () => {
       status: "recovered",
     };
 
-    // Send to backend recoveredItems collection
     fetch("http://localhost:3000/recoveredItems", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(recoveredData),
     })
       .then(res => res.json())
       .then(data => {
         if (data.insertedId) {
-          // Update original item status
           fetch(`http://localhost:3000/items/${item._id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -89,7 +84,11 @@ const ItemDetailsPage = () => {
             .then(() => {
               Swal.fire("Success", "Item marked as recovered!", "success");
               setModalOpen(false);
-              // Optionally refresh or redirect user
+              // Update local item state to reflect status change immediately
+              setItem(prev => ({ ...prev, status: "recovered" }));
+            })
+            .catch(() => {
+              Swal.fire("Error", "Failed to update item status.", "error");
             });
         } else {
           Swal.fire("Error", "Failed to recover item. Try again.", "error");
@@ -100,7 +99,7 @@ const ItemDetailsPage = () => {
       });
   };
 
-  if (loading) return <Loading></Loading>;
+  if (loading) return <Loading />;
   if (!item) return <p className="text-center py-10">Item not found.</p>;
 
   return (
@@ -110,9 +109,14 @@ const ItemDetailsPage = () => {
       <p><strong>Category:</strong> {item.category}</p>
       <p><strong>Location:</strong> {item.location}</p>
       <p><strong>Date:</strong> {new Date(item.date).toLocaleDateString()}</p>
-      <p><strong>Status:</strong> <span className={`font-semibold ${item.status === "recovered" ? "text-green-600" : "text-red-600"}`}>{item.postType}</span></p>
+      <p>
+        <strong>Status:</strong>{" "}
+        <span className={`font-semibold ${item.status === "recovered" ? "text-green-600" : "text-red-600"}`}>
+          {item.status === "recovered" ? "Recovered" : item.postType}
+        </span>
+      </p>
 
-      {(item.status !== "recovered") && (
+      {item.status !== "recovered" && (
         <button
           onClick={handleRecoverClick}
           className="mt-6 px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -130,9 +134,10 @@ const ItemDetailsPage = () => {
             <input
               type="text"
               value={recoveredLocation}
-              onChange={(e) => setRecoveredLocation(e.target.value)}
+              onChange={e => setRecoveredLocation(e.target.value)}
               className="border p-2 rounded w-full mb-4"
               placeholder="Enter recovered location"
+              autoFocus
             />
 
             <label className="block mb-2 font-semibold">Recovered Date:</label>
