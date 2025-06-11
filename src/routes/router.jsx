@@ -9,6 +9,8 @@ import PrivateRoute from "./PrivateRoute";
 import AllItems from "../pages/AllItemsPage";
 import MyItems from "../pages/MyItems";
 import UpdateItem from "../pages/UpdateItem";
+import RecoveredItemsPage from "../pages/RecoveredItemsPage";
+import ItemDetailsPage from "../pages/ItemDetailsPage";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +32,14 @@ const router = createBrowserRouter([
       {
         path: '/updateItem/:id',
         element: <PrivateRoute><UpdateItem></UpdateItem></PrivateRoute>
+      },
+      {
+        path: '/recovered-items',
+        element: <PrivateRoute><RecoveredItemsPage></RecoveredItemsPage></PrivateRoute>
+      },
+      {
+        path: '/items/:id',
+        element: <PrivateRoute><ItemDetailsPage></ItemDetailsPage></PrivateRoute>
       },
       {
         path: '/lost-found-items',
