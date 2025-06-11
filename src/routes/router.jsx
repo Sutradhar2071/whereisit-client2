@@ -8,6 +8,7 @@ import AddItem from "../pages/AddItem";
 import PrivateRoute from "./PrivateRoute";
 import AllItems from "../pages/AllItemsPage";
 import MyItems from "../pages/MyItems";
+import UpdateItem from "../pages/UpdateItem";
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/my-items',
-        element: <MyItems></MyItems>
+        element: <PrivateRoute><MyItems></MyItems></PrivateRoute>
+      },
+      {
+        path: '/updateItem/:id',
+        element: <PrivateRoute><UpdateItem></UpdateItem></PrivateRoute>
       },
       {
         path: '/lost-found-items',
