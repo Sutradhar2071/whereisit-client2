@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { AuthContext } from "../providers/AuthProvider";
+import Loading from "../components/Loading";
 
 const RecoveredItemsPage = () => {
   const [items, setItems] = useState([]);
@@ -22,7 +23,7 @@ const RecoveredItemsPage = () => {
       });
   }, [user]);
 
-  if (loading) return <p className="text-center py-10">Loading...</p>;
+  if (loading) return <Loading></Loading>;
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-10">
