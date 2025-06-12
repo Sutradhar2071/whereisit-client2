@@ -2,59 +2,86 @@ import React from "react";
 import { CiTwitter } from "react-icons/ci";
 import { FaFacebookSquare, FaInstagramSquare } from "react-icons/fa";
 
- const Footer = () => {
+const Footer = () => {
   return (
-    <footer className="bg-base-200 text-base-content mt-12">
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <footer className="bg-base-200 text-base-content mt-16">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Logo and Description */}
-          <aside>
-            <div className="flex items-center gap-2 mb-2">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
               <img
                 src="https://i.ibb.co/bgCktXkj/5654592.png"
                 alt="Logo"
-                className="w-10 h-10"
+                className="w-12 h-12"
               />
               <span className="text-2xl font-bold text-primary">WhereIsIt</span>
             </div>
-            <p>Lost & Found Platform<br />Since 2025</p>
-          </aside>
+            <p className="text-sm text-gray-500">
+              Your trusted Lost & Found platform <br /> Serving Bangladesh since 2025
+            </p>
+          </div>
 
           {/* Quick Links */}
-          <nav>
-            <h6 className="footer-title">Quick Links</h6>
-            <a className="link link-hover">Home</a> <br />
-            <a className="link link-hover">Lost Items</a> <br />
-            <a className="link link-hover">Add Item</a> <br />
-            <a className="link link-hover">Recovered</a> <br />
-          </nav>
+          <div>
+            <h6 className="text-lg font-semibold mb-3 text-primary">Quick Links</h6>
+            <ul className="space-y-2 text-sm">
+              <li><a className="hover:text-primary duration-200" href="/">Home</a></li>
+              <li><a className="hover:text-primary duration-200" href="/lost-found-items">Lost & Found Items</a></li>
+              <li><a className="hover:text-primary duration-200" href="/add-item">Add Item</a></li>
+              <li><a className="hover:text-primary duration-200" href="/recovered-items">Recovered</a></li>
+            </ul>
+          </div>
 
-          {/* Contact */}
-          <nav>
-            <h6 className="footer-title">Contact</h6>
-            <a className="link link-hover">sutradharringku@gmail.com</a> <br />
-            <a className="link link-hover">+880-1911041674</a> <br />
-            <a className="link link-hover">Dhaka, Bangladesh</a>
-          </nav>
+          {/* Contact Info */}
+          <div>
+            <h6 className="text-lg font-semibold mb-3 text-primary">Contact</h6>
+            <ul className="space-y-2 text-sm">
+              <li><a href="mailto:sutradharringku@gmail.com" className="hover:text-primary duration-200">sutradharringku@gmail.com</a></li>
+              <li><a href="tel:+8801911041674" className="hover:text-primary duration-200">+880-1911-041674</a></li>
+              <li className="text-gray-500">Dhaka, Bangladesh</li>
+            </ul>
+          </div>
 
-          {/* Social */}
-          <nav>
-            <h6 className="footer-title">Social</h6>
-            <div className="flex gap-4 mt-2 text-xl">
-              <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer"><i className="fab fa-facebook-f"><FaFacebookSquare /></i></a>
-              <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter"><CiTwitter /></i></a>
-              <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram"><FaInstagramSquare /></i></a>
+          {/* Social Links */}
+          <div>
+            <h6 className="text-lg font-semibold mb-3 text-primary">Follow Us</h6>
+            <div className="flex gap-5 text-2xl">
+              <a
+                href="https://www.facebook.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-blue-600 transition-colors"
+              >
+                <FaFacebookSquare />
+              </a>
+              <a
+                href="https://twitter.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-sky-400 transition-colors"
+              >
+                <CiTwitter />
+              </a>
+              <a
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-pink-500 transition-colors"
+              >
+                <FaInstagramSquare />
+              </a>
             </div>
-          </nav>
+          </div>
         </div>
 
-        {/* Bottom text */}
-        <div className="text-center pt-6 mt-10 border-t border-base-300">
-          <p>© 2025 WhereIsIt. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-6 border-t border-base-300 text-center text-sm text-gray-500">
+          © {new Date().getFullYear()} <span className="font-semibold text-primary">WhereIsIt</span>. All rights reserved.
         </div>
       </div>
     </footer>
   );
- };
+};
 
- export default Footer;
+export default Footer;
