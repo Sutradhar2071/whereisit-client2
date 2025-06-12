@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
+import useTitle from "../hooks/useTitle";
 
 const AllItems = () => {
+  useTitle("WhereIsIt | All Items")
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,7 @@ const AllItems = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-5">

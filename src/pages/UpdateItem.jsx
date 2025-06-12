@@ -5,8 +5,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import { AuthContext } from "../providers/AuthProvider";
 import Loading from "../components/Loading";
+import useTitle from "../hooks/useTitle";
 
 const UpdateItem = () => {
+  useTitle("WhereIsIt | Update Page")
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);

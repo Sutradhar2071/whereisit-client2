@@ -2,8 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { FaCheckCircle, FaThLarge, FaTable } from "react-icons/fa";
 import { AuthContext } from "../providers/AuthProvider";
 import Loading from "../components/Loading";
+import useTitle from "../hooks/useTitle";
 
 const RecoveredItemsPage = () => {
+  useTitle("WhereIsIt | Recovered Items Page")
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);

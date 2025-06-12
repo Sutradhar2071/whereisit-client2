@@ -3,8 +3,10 @@ import { AuthContext } from "../providers/AuthProvider";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
+import useTitle from "../hooks/useTitle";
 
 const MyItems = () => {
+  useTitle("WhereIsIt | My Item Page")
   const { user } = useContext(AuthContext);
   const [myItems, setMyItems] = useState([]);
   const [loading, setLoading] = useState(true);

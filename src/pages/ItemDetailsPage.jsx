@@ -5,8 +5,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import Loading from "../components/Loading";
+import useTitle from "../hooks/useTitle";
 
 const ItemDetailsPage = () => {
+  useTitle("WhereIsIt | View details Page")
   const { id } = useParams();
   const { user } = useContext(AuthContext);
 

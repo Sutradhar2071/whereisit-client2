@@ -2,8 +2,10 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from "../providers/AuthProvider";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
+import useTitle from "../hooks/useTitle";
 
 const Login = () => {
+  useTitle("WhereIsIt | Login Page")
   const { signIn, googleSignIn } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
 

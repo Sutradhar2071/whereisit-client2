@@ -3,10 +3,12 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProvider";
+import useTitle from "../hooks/useTitle";
 
 const MySwal = withReactContent(Swal);
 
 const Register = () => {
+  useTitle("WhereIsIt | Register Page")
   const [formData, setFormData] = useState({
     name: "",
     email: "",
