@@ -1,32 +1,44 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaThLarge, FaTable } from "react-icons/fa";
 import { AuthContext } from "../providers/AuthProvider";
 import Loading from "../components/Loading";
 import useTitle from "../hooks/useTitle";
+import Swal from "sweetalert2";
 
 const RecoveredItemsPage = () => {
   useTitle("WhereIsIt | Recovered Items Page")
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
-
-  // layout state: true = grid(cards), false = table
   const [isGridLayout, setIsGridLayout] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user?.email) return;
 
-    fetch(`http://localhost:3000/recoveredItems?email=${user.email}`)
-      .then(res => res.json())
+    fetch(`http://localhost:3000/recoveredItems?email=${user.email}`, {
+      credentials: 'include'
+    })
+      .then(res => {
+        if (res.status === 401) {
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
       .then(data => {
         setItems(data);
         setLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch recovered items", err);
+        if (err.message === 'Unauthorized') {
+          Swal.fire("Session Expired", "Please login again", "error");
+          navigate('/login');
+        }
         setLoading(false);
       });
-  }, [user]);
+  }, [user, navigate]);
 
   if (loading) return <Loading />;
 
@@ -35,9 +47,7 @@ const RecoveredItemsPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-center flex-grow">My Recovered Items</h2>
 
-        {/* Icon buttons styled like images */}
         <div className="flex gap-4 ml-4">
-          {/* Grid Icon */}
           <button
             onClick={() => setIsGridLayout(true)}
             aria-label="Grid View"
@@ -48,7 +58,6 @@ const RecoveredItemsPage = () => {
             <FaThLarge size={28} />
           </button>
 
-          {/* Table Icon */}
           <button
             onClick={() => setIsGridLayout(false)}
             aria-label="Table View"
@@ -62,7 +71,7 @@ const RecoveredItemsPage = () => {
       </div>
 
       {items.length === 0 ? (
-        <p className="text-center text-gray-600">You haven’t recovered any items yet.</p>
+        <p className="text-center text-gray-600">You haven't recovered any items yet.</p>
       ) : (
         <>
           {isGridLayout ? (

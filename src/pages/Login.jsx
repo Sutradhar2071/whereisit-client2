@@ -8,11 +8,8 @@ const Login = () => {
   useTitle("WhereIsIt | Login Page")
   const { signIn, googleSignIn } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
-
   const navigate = useNavigate();
   const location = useLocation();
-
-
   const from = location.state?.from?.pathname || "/";
 
   const handleChange = (e) => {
@@ -68,9 +65,7 @@ const Login = () => {
         <h1 className="text-2xl font-bold text-center">Login</h1>
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1 text-sm">
-            <label htmlFor="email" className="block dark:text-gray-600">
-              Email
-            </label>
+            <label htmlFor="email" className="block dark:text-gray-600">Email</label>
             <input
               required
               type="email"
@@ -82,9 +77,7 @@ const Login = () => {
             />
           </div>
           <div className="space-y-1 text-sm">
-            <label htmlFor="password" className="block dark:text-gray-600">
-              Password
-            </label>
+            <label htmlFor="password" className="block dark:text-gray-600">Password</label>
             <input
               required
               type="password"

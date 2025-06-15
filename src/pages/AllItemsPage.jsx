@@ -1,44 +1,73 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../providers/AuthProvider";
 import Loading from "../components/Loading";
 import useTitle from "../hooks/useTitle";
+import Swal from "sweetalert2";
 
-const AllItems = () => {
-  useTitle("WhereIsIt | All Items")
-  const [items, setItems] = useState([]);
+const AllItemsPage = () => {
+  useTitle("WhereIsIt | All Items");
+  const [allItems, setAllItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); 
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    fetch("http://localhost:3000/allItems")
-      .then((res) => res.json())
-      .then((data) => {
-        setItems(data);
-        setFilteredItems(data); 
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, []);
+    const fetchItems = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/allItems", {
+          credentials: 'include'
+        });
 
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Unauthorized');
+          }
+          throw new Error('Failed to fetch items');
+        }
+
+        const data = await response.json();
+        setAllItems(data);
+        setFilteredItems(data);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+        if (error.message === 'Unauthorized') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Session Expired',
+            text: 'Please login again to view items',
+          });
+          navigate('/login');
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load items',
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [navigate]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setFilteredItems(items);
+      setFilteredItems(allItems);
     } else {
       const lowerTerm = searchTerm.toLowerCase();
-      const filtered = items.filter(
+      const filtered = allItems.filter(
         (item) =>
           item.title.toLowerCase().includes(lowerTerm) ||
           item.location.toLowerCase().includes(lowerTerm)
       );
       setFilteredItems(filtered);
     }
-  }, [searchTerm, items]);
+  }, [searchTerm, allItems]);
 
   if (loading) {
     return <Loading />;
@@ -47,19 +76,26 @@ const AllItems = () => {
   if (!loading && filteredItems.length === 0) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-5">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
-          No item found!!
-        </h2>
-        <button
-          onClick={() => navigate("/add-item")}
-          className="px-6 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition"
-        >
-          Add new item
-        </button>
+        {searchTerm ? (
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+            No items match your search
+          </h2>
+        ) : (
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+            No items found
+          </h2>
+        )}
+        {user && (
+          <button
+            onClick={() => navigate("/add-item")}
+            className="px-6 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition"
+          >
+            Add new item
+          </button>
+        )}
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-5">
@@ -67,14 +103,13 @@ const AllItems = () => {
         All Lost & Found Items
       </h1>
 
-      {/* Search Input */}
       <div className="max-w-md mx-auto mb-6">
         <input
           type="text"
           placeholder="Search by title or location..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 rounded text-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-600"
+          className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:bg-gray-800 dark:text-white"
         />
       </div>
 
@@ -82,21 +117,26 @@ const AllItems = () => {
         {filteredItems.map((item) => (
           <div
             key={item._id}
-            className="bg-white dark:bg-gray-100 rounded-lg shadow-md p-5 space-y-2"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 space-y-2 hover:shadow-lg transition"
           >
-            <h2 className="text-xl font-semibold">{item.title}</h2>
-            <p>
+            <h2 className="text-xl font-semibold dark:text-white">{item.title}</h2>
+            <p className="dark:text-gray-300">
               <span className="font-semibold">Category:</span> {item.category}
             </p>
-            <p>
+            <p className="dark:text-gray-300">
               <span className="font-semibold">Location:</span> {item.location}
             </p>
-            <p>
-              <span className="font-semibold">Status:</span> {item.postType}
+            <p className="dark:text-gray-300">
+              <span className="font-semibold">Status:</span>{" "}
+              <span className={`font-semibold ${
+                item.postType === "Lost" ? "text-red-500" : "text-green-500"
+              }`}>
+                {item.postType}
+              </span>
             </p>
 
             <Link to={`/items/${item._id}`}>
-              <button className="mt-2 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700">
+              <button className="mt-2 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition">
                 View Details
               </button>
             </Link>
@@ -107,4 +147,4 @@ const AllItems = () => {
   );
 };
 
-export default AllItems;
+export default AllItemsPage;

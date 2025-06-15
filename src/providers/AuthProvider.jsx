@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -44,9 +44,39 @@ const AuthProvider = ({ children }) => {
     });
   };
 
+  const saveUserAndGetToken = async (currentUser) => {
+    const userInfo = {
+      email: currentUser.email,
+      name: currentUser.displayName,
+      photoURL: currentUser.photoURL,
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/jwt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userInfo),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get JWT token');
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+        saveUserAndGetToken(currentUser);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 

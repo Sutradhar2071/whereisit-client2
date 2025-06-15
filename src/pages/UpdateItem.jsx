@@ -16,18 +16,30 @@ const UpdateItem = () => {
   const [itemData, setItemData] = useState(null);
   const [date, setDate] = useState(new Date());
 
-  // Fetch item by ID
   useEffect(() => {
-    fetch(`http://localhost:3000/items/${id}`)
-      .then(res => res.json())
+    fetch(`http://localhost:3000/items/${id}`, {
+      credentials: 'include'
+    })
+      .then(res => {
+        if (res.status === 401) {
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
       .then(data => {
         setItemData(data);
         if (data?.date) {
           setDate(new Date(data.date));
         }
       })
-      .catch(err => console.error(err));
-  }, [id]);
+      .catch(err => {
+        console.error(err);
+        if (err.message === 'Unauthorized') {
+          Swal.fire("Session Expired", "Please login again", "error");
+          navigate('/login');
+        }
+      });
+  }, [id, navigate]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -45,20 +57,35 @@ const UpdateItem = () => {
       email: user?.email,
     };
 
-    const res = await fetch(`http://localhost:3000/updateItems/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedItem),
-    });
+    try {
+      const res = await fetch(`http://localhost:3000/updateItems/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedItem),
+        credentials: 'include'
+      });
 
-    const result = await res.json();
-    if (result.modifiedCount > 0) {
-      Swal.fire("Updated!", "Item updated successfully!", "success");
-      navigate("/my-items");
-    } else {
-      Swal.fire("Error", "Failed to update item.", "error");
+      if (res.status === 401) {
+        throw new Error('Unauthorized');
+      }
+
+      const result = await res.json();
+      if (result.modifiedCount > 0) {
+        Swal.fire("Updated!", "Item updated successfully!", "success");
+        navigate("/my-items");
+      } else {
+        Swal.fire("Error", "Failed to update item.", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.message === 'Unauthorized') {
+        Swal.fire("Session Expired", "Please login again", "error");
+        navigate('/login');
+      } else {
+        Swal.fire("Error", "Failed to update item.", "error");
+      }
     }
   };
 
@@ -68,7 +95,6 @@ const UpdateItem = () => {
     <div className="max-w-2xl mx-auto mt-10 p-5 border rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold mb-5">Update Lost or Found Item</h2>
       <form onSubmit={handleUpdate} className="space-y-4">
-        {/* Post Type */}
         <div>
           <label className="block font-medium">Post Type</label>
           <select name="postType" defaultValue={itemData.postType} className="w-full border p-2 rounded" required>
@@ -78,25 +104,21 @@ const UpdateItem = () => {
           </select>
         </div>
 
-        {/* Thumbnail */}
         <div>
           <label className="block font-medium">Thumbnail (Image URL)</label>
           <input type="text" name="thumbnail" defaultValue={itemData.thumbnail} className="w-full border p-2 rounded" required />
         </div>
 
-        {/* Title */}
         <div>
           <label className="block font-medium">Title</label>
           <input type="text" name="title" defaultValue={itemData.title} className="w-full border p-2 rounded" required />
         </div>
 
-        {/* Description */}
         <div>
           <label className="block font-medium">Description</label>
           <textarea name="description" defaultValue={itemData.description} className="w-full border p-2 rounded" rows="3" required></textarea>
         </div>
 
-        {/* Category */}
         <div>
           <label className="block font-medium">Category</label>
           <select name="category" defaultValue={itemData.category} className="w-full border p-2 rounded" required>
@@ -109,19 +131,16 @@ const UpdateItem = () => {
           </select>
         </div>
 
-        {/* Location */}
         <div>
           <label className="block font-medium">Location</label>
           <input type="text" name="location" defaultValue={itemData.location} className="w-full border p-2 rounded" required />
         </div>
 
-        {/* Date Picker */}
         <div>
           <label className="block font-medium">Date Lost/Found</label>
           <DatePicker selected={date} onChange={(date) => setDate(date)} className="w-full border p-2 rounded" />
         </div>
 
-        {/* Readonly Contact Info */}
         <div>
           <label className="block font-medium">Contact Name</label>
           <input type="text" value={user?.displayName} readOnly className="w-full border p-2 rounded bg-gray-100" />
@@ -132,7 +151,6 @@ const UpdateItem = () => {
           <input type="email" value={user?.email} readOnly className="w-full border p-2 rounded bg-gray-100" />
         </div>
 
-        {/* Submit */}
         <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
           Update Item
         </button>

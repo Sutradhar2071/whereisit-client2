@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProvider";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
@@ -10,18 +11,34 @@ const MyItems = () => {
   const { user } = useContext(AuthContext);
   const [myItems, setMyItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.email) {
-      fetch(`http://localhost:3000/allItems`)
-        .then((res) => res.json())
-        .then((data) => {
+      fetch(`http://localhost:3000/allItems`, {
+        credentials: 'include'
+      })
+        .then(res => {
+          if (res.status === 401) {
+            throw new Error('Unauthorized');
+          }
+          return res.json();
+        })
+        .then(data => {
           const userItems = data.filter((item) => item.email === user.email);
           setMyItems(userItems);
           setLoading(false);
+        })
+        .catch(err => {
+          console.error(err);
+          if (err.message === 'Unauthorized') {
+            Swal.fire("Session Expired", "Please login again", "error");
+            navigate('/login');
+          }
+          setLoading(false);
         });
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
@@ -38,8 +55,12 @@ const MyItems = () => {
       try {
         const res = await fetch(`http://localhost:3000/items/${id}`, {
           method: "DELETE",
+          credentials: 'include'
         });
 
+        if (res.status === 401) {
+          throw new Error('Unauthorized');
+        }
         
         if (!res.ok) {
           const errorText = await res.text();
@@ -57,8 +78,13 @@ const MyItems = () => {
           Swal.fire("Not Found", "Item not found or already deleted", "info");
         }
       } catch (error) {
-        console.error(" Delete failed:", error);
-        Swal.fire("Error", "Something went wrong!", "error");
+        console.error("Delete failed:", error);
+        if (error.message === 'Unauthorized') {
+          Swal.fire("Session Expired", "Please login again", "error");
+          navigate('/login');
+        } else {
+          Swal.fire("Error", "Something went wrong!", "error");
+        }
       }
     }
   };

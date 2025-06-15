@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { AuthContext } from "../providers/AuthProvider";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -10,28 +10,38 @@ import useTitle from "../hooks/useTitle";
 const ItemDetailsPage = () => {
   useTitle("WhereIsIt | View details Page")
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-
-  // Recovered form state
   const [recoveredLocation, setRecoveredLocation] = useState("");
   const [recoveredDate, setRecoveredDate] = useState(new Date());
 
   useEffect(() => {
-    fetch(`http://localhost:3000/items/${id}`)
-      .then(res => res.json())
+    fetch(`http://localhost:3000/items/${id}`, {
+      credentials: 'include'
+    })
+      .then(res => {
+        if (res.status === 401) {
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
       .then(data => {
         setItem(data);
         setLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch item details", err);
+        if (err.message === 'Unauthorized') {
+          Swal.fire("Session Expired", "Please login again", "error");
+          navigate('/login');
+        }
         setLoading(false);
       });
-  }, [id]);
+  }, [id, navigate]);
 
   const handleRecoverClick = () => {
     if (!user) {
@@ -74,19 +84,25 @@ const ItemDetailsPage = () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(recoveredData),
+      credentials: 'include'
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 401) {
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
       .then(data => {
         if (data.insertedId) {
           fetch(`http://localhost:3000/items/${item._id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: "recovered" }),
+            credentials: 'include'
           })
             .then(() => {
               Swal.fire("Success", "Item marked as recovered!", "success");
               setModalOpen(false);
-              // Update local item state to reflect status change immediately
               setItem(prev => ({ ...prev, status: "recovered" }));
             })
             .catch(() => {
@@ -96,8 +112,13 @@ const ItemDetailsPage = () => {
           Swal.fire("Error", "Failed to recover item. Try again.", "error");
         }
       })
-      .catch(() => {
-        Swal.fire("Error", "Failed to recover item. Try again.", "error");
+      .catch((error) => {
+        if (error.message === 'Unauthorized') {
+          Swal.fire("Session Expired", "Please login again", "error");
+          navigate('/login');
+        } else {
+          Swal.fire("Error", "Failed to recover item. Try again.", "error");
+        }
       });
   };
 
@@ -127,7 +148,6 @@ const ItemDetailsPage = () => {
         </button>
       )}
 
-      {/* Recovery Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded max-w-md w-full relative">

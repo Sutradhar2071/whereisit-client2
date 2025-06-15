@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AuthContext } from "../providers/AuthProvider";
@@ -9,57 +10,69 @@ const AddItem = () => {
   useTitle("WhereIsIt | Add Lost & Found Item");
   const { user } = useContext(AuthContext);
   const [date, setDate] = useState(new Date());
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
 
-    const postType = form.postType.value;
-    const thumbnail = form.thumbnail.value;
-    const title = form.title.value;
-    const description = form.description.value;
-    const category = form.category.value;
-    const location = form.location.value;
-    const contactName = user?.displayName || "N/A";
-    const email = user?.email || "N/A";
-
     const newItem = {
-      postType,
-      thumbnail,
-      title,
-      description,
-      category,
-      location,
+      postType: form.postType.value,
+      thumbnail: form.thumbnail.value,
+      title: form.title.value,
+      description: form.description.value,
+      category: form.category.value,
+      location: form.location.value,
       date: date.toISOString().split("T")[0],
-      contactName,
-      email,
+      contactName: user?.displayName || "N/A",
+      email: user?.email || "N/A",
     };
 
-    const res = await fetch("http://localhost:3000/addItems", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newItem),
-    });
+    try {
+      const res = await fetch("http://localhost:3000/addItems", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newItem),
+        credentials: 'include'
+      });
 
-    const data = await res.json();
-    if (data.insertedId) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Item added successfully!',
-        confirmButtonColor: '#3085d6'
-      });
-      form.reset();
-      setDate(new Date());
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Failed to add item.',
-        confirmButtonColor: '#d33'
-      });
+      if (res.status === 401) {
+        throw new Error('Unauthorized');
+      }
+
+      const data = await res.json();
+      if (data.insertedId) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Item added successfully!',
+          confirmButtonColor: '#3085d6'
+        });
+        form.reset();
+        setDate(new Date());
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to add item.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.message === 'Unauthorized') {
+        Swal.fire("Session Expired", "Please login again", "error");
+        navigate('/login');
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to add item.',
+          confirmButtonColor: '#d33'
+        });
+      }
     }
   };
 
