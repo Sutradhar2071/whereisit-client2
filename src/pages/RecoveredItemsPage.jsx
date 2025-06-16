@@ -27,12 +27,11 @@ const RecoveredItemsPage = () => {
         const token = await getIdToken();
 
         const res = await fetch(
-          `http://localhost:3000/recoveredItems?email=${user.email}`,
+          `https://whereisit-server-nine.vercel.app/recoveredItems?email=${user.email}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
+            }
           }
         );
 

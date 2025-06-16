@@ -24,11 +24,11 @@ const UpdateItem = () => {
       }
       try {
         const token = await getIdToken(); 
-        const res = await fetch(`http://localhost:3000/items/${id}`, {
+        const res = await fetch(`https://whereisit-server-nine.vercel.app/items/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          credentials: "include",
+          // credentials: "include",
         });
 
         if (res.status === 401) {
@@ -79,14 +79,14 @@ const UpdateItem = () => {
     try {
       const token = await getIdToken(); 
 
-      const res = await fetch(`http://localhost:3000/updateItems/${id}`, {
+      const res = await fetch(`https://whereisit-server-nine.vercel.app/updateItems/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updatedItem),
-        credentials: "include",
+        // credentials: "include",
       });
 
       if (res.status === 401) {

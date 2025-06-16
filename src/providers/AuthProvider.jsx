@@ -58,7 +58,7 @@ const AuthProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/jwt", {
+      const response = await fetch("https://whereisit-server-nine.vercel.app/jwt", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

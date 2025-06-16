@@ -31,14 +31,14 @@ const AddItem = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/addItems", {
+      const res = await fetch("https://whereisit-server-nine.vercel.app/addItems", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, // Token দিয়ে Authorization header যোগ করা হলো
         },
         body: JSON.stringify(newItem),
-        credentials: 'include', // যদি cookie-based auth দরকার হয়
+        // credentials: 'include', // যদি cookie-based auth দরকার হয়
       });
 
       if (res.status === 401) {

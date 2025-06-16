@@ -31,7 +31,7 @@ const ItemDetailsPage = () => {
     const fetchItemDetails = async () => {
       try {
         const token = await getToken();
-        const res = await fetch(`http://localhost:3000/items/${id}`, {
+        const res = await fetch(`https://whereisit-server-nine.vercel.app/items/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -102,7 +102,7 @@ const ItemDetailsPage = () => {
       const token = await getToken();
 
       // ✅ POST recoveredItem
-      const res = await fetch("http://localhost:3000/recoveredItems", {
+      const res = await fetch("https://whereisit-server-nine.vercel.app/recoveredItems", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +117,7 @@ const ItemDetailsPage = () => {
 
       if (data.insertedId) {
         // ✅ PATCH update item status
-        await fetch(`http://localhost:3000/items/${item._id}`, {
+        await fetch(`https://whereisit-server-nine.vercel.app/items/${item._id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",

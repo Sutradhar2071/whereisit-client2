@@ -20,7 +20,7 @@ const MyItems = () => {
       }
       try {
         const token = await getIdToken();
-        const res = await fetch("http://localhost:3000/allItems", {
+        const res = await fetch("https://whereisit-server-nine.vercel.app/allItems", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -65,7 +65,7 @@ const MyItems = () => {
     try {
       const token = await getIdToken();
 
-      const res = await fetch(`http://localhost:3000/items/${id}`, {
+      const res = await fetch(`https://whereisit-server-nine.vercel.app/items/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

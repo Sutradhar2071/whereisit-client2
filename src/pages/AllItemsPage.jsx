@@ -19,7 +19,7 @@ const AllItemsPage = () => {
       try {
         const token = await user?.getIdToken(); 
 
-        const response = await fetch("http://localhost:3000/allItems", {
+        const response = await fetch("https://whereisit-server-nine.vercel.app/allItems", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
