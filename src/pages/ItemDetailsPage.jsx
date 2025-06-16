@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProvider";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,7 +8,8 @@ import Loading from "../components/Loading";
 import useTitle from "../hooks/useTitle";
 
 const ItemDetailsPage = () => {
-  useTitle("WhereIsIt | View details Page")
+  useTitle("WhereIsIt | View Details Page");
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -19,45 +20,62 @@ const ItemDetailsPage = () => {
   const [recoveredLocation, setRecoveredLocation] = useState("");
   const [recoveredDate, setRecoveredDate] = useState(new Date());
 
+  // ✅ Firebase Token fetch helper
+  const getToken = async () => {
+    const token = await user?.getIdToken();
+    return token;
+  };
+
+  // ✅ Fetch item details
   useEffect(() => {
-    fetch(`http://localhost:3000/items/${id}`, {
-      credentials: 'include'
-    })
-      .then(res => {
+    const fetchItemDetails = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`http://localhost:3000/items/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (res.status === 401) {
-          throw new Error('Unauthorized');
+          throw new Error("Unauthorized");
         }
-        return res.json();
-      })
-      .then(data => {
+
+        const data = await res.json();
         setItem(data);
         setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch item details", err);
-        if (err.message === 'Unauthorized') {
+      } catch (error) {
+        console.error("Failed to fetch item", error);
+        if (error.message === "Unauthorized") {
           Swal.fire("Session Expired", "Please login again", "error");
-          navigate('/login');
+          navigate("/login");
         }
         setLoading(false);
-      });
-  }, [id, navigate]);
+      }
+    };
+
+    if (user) {
+      fetchItemDetails();
+    }
+  }, [id, navigate, user]);
 
   const handleRecoverClick = () => {
     if (!user) {
       Swal.fire("Login Required", "Please login to recover this item.", "warning");
       return;
     }
+
     if (item.status === "recovered") {
-      Swal.fire("Already Recovered", "This item is already marked as recovered.", "info");
+      Swal.fire("Already Recovered", "This item is already recovered.", "info");
       return;
     }
+
     setModalOpen(true);
   };
 
-  const handleSubmitRecovery = () => {
+  const handleSubmitRecovery = async () => {
     if (!recoveredLocation.trim()) {
-      Swal.fire("Validation Error", "Please enter the recovered location.", "error");
+      Swal.fire("Validation Error", "Recovered location is required.", "error");
       return;
     }
 
@@ -80,46 +98,48 @@ const ItemDetailsPage = () => {
       status: "recovered",
     };
 
-    fetch("http://localhost:3000/recoveredItems", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(recoveredData),
-      credentials: 'include'
-    })
-      .then(res => {
-        if (res.status === 401) {
-          throw new Error('Unauthorized');
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (data.insertedId) {
-          fetch(`http://localhost:3000/items/${item._id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "recovered" }),
-            credentials: 'include'
-          })
-            .then(() => {
-              Swal.fire("Success", "Item marked as recovered!", "success");
-              setModalOpen(false);
-              setItem(prev => ({ ...prev, status: "recovered" }));
-            })
-            .catch(() => {
-              Swal.fire("Error", "Failed to update item status.", "error");
-            });
-        } else {
-          Swal.fire("Error", "Failed to recover item. Try again.", "error");
-        }
-      })
-      .catch((error) => {
-        if (error.message === 'Unauthorized') {
-          Swal.fire("Session Expired", "Please login again", "error");
-          navigate('/login');
-        } else {
-          Swal.fire("Error", "Failed to recover item. Try again.", "error");
-        }
+    try {
+      const token = await getToken();
+
+      // ✅ POST recoveredItem
+      const res = await fetch("http://localhost:3000/recoveredItems", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(recoveredData),
       });
+
+      if (res.status === 401) throw new Error("Unauthorized");
+
+      const data = await res.json();
+
+      if (data.insertedId) {
+        // ✅ PATCH update item status
+        await fetch(`http://localhost:3000/items/${item._id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: "recovered" }),
+        });
+
+        Swal.fire("Success", "Item marked as recovered!", "success");
+        setItem(prev => ({ ...prev, status: "recovered" }));
+        setModalOpen(false);
+      } else {
+        Swal.fire("Error", "Failed to recover the item", "error");
+      }
+    } catch (err) {
+      if (err.message === "Unauthorized") {
+        Swal.fire("Session Expired", "Please login again", "error");
+        navigate("/login");
+      } else {
+        Swal.fire("Error", "Something went wrong", "error");
+      }
+    }
   };
 
   if (loading) return <Loading />;
@@ -148,15 +168,17 @@ const ItemDetailsPage = () => {
         </button>
       )}
 
+      {/* ✅ Recovery Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded max-w-md w-full relative">
             <h3 className="text-xl font-bold mb-4">Recover Item</h3>
+
             <label className="block mb-2 font-semibold">Recovered Location:</label>
             <input
               type="text"
               value={recoveredLocation}
-              onChange={e => setRecoveredLocation(e.target.value)}
+              onChange={(e) => setRecoveredLocation(e.target.value)}
               className="border p-2 rounded w-full mb-4"
               placeholder="Enter recovered location"
               autoFocus
@@ -165,7 +187,7 @@ const ItemDetailsPage = () => {
             <label className="block mb-2 font-semibold">Recovered Date:</label>
             <DatePicker
               selected={recoveredDate}
-              onChange={date => setRecoveredDate(date)}
+              onChange={(date) => setRecoveredDate(date)}
               className="border p-2 rounded w-full mb-4"
               maxDate={new Date()}
             />

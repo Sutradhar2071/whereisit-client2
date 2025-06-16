@@ -1,11 +1,12 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../providers/AuthProvider";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import useTitle from "../hooks/useTitle";
 
 const Login = () => {
-  useTitle("WhereIsIt | Login Page")
+  useTitle("WhereIsIt | Login Page");
+
   const { signIn, googleSignIn } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
@@ -21,13 +22,18 @@ const Login = () => {
     const { email, password } = formData;
 
     signIn(email, password)
-      .then(() => {
+      .then(async (result) => {
+        const user = result.user;
+        const token = await user.getIdToken(); 
+        localStorage.setItem("access-token", token); 
+
         Swal.fire({
           icon: "success",
           title: "Login Successful!",
           showConfirmButton: false,
           timer: 1500,
         });
+
         navigate(from, { replace: true });
       })
       .catch((error) => {
@@ -41,13 +47,18 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     googleSignIn()
-      .then(() => {
+      .then(async (result) => {
+        const user = result.user;
+        const token = await user.getIdToken(); 
+        localStorage.setItem("access-token", token); 
+
         Swal.fire({
           icon: "success",
           title: "Google Sign-in Successful!",
           showConfirmButton: false,
           timer: 1500,
         });
+
         navigate(from, { replace: true });
       })
       .catch((error) => {
@@ -63,9 +74,12 @@ const Login = () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="w-full max-w-md p-8 space-y-4 rounded-xl dark:bg-gray-50 dark:text-gray-800 bg-white shadow-lg">
         <h1 className="text-2xl font-bold text-center">Login</h1>
+
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1 text-sm">
-            <label htmlFor="email" className="block dark:text-gray-600">Email</label>
+            <label htmlFor="email" className="block dark:text-gray-600">
+              Email
+            </label>
             <input
               required
               type="email"
@@ -76,8 +90,11 @@ const Login = () => {
               className="w-full px-4 py-3 rounded-md border dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
             />
           </div>
+
           <div className="space-y-1 text-sm">
-            <label htmlFor="password" className="block dark:text-gray-600">Password</label>
+            <label htmlFor="password" className="block dark:text-gray-600">
+              Password
+            </label>
             <input
               required
               type="password"
@@ -88,6 +105,7 @@ const Login = () => {
               className="w-full px-4 py-3 rounded-md border dark:border-gray-300 dark:bg-gray-50 dark:text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
             />
           </div>
+
           <button
             type="submit"
             className="block w-full p-3 text-center rounded-sm text-white bg-violet-600 hover:bg-violet-700 transition-colors"
@@ -118,12 +136,12 @@ const Login = () => {
 
         <p className="text-xs text-center mt-4 dark:text-gray-600">
           Don't have an account?
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="text-violet-600 font-semibold ml-1 underline"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

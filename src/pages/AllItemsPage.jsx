@@ -17,15 +17,20 @@ const AllItemsPage = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
+        const token = await user?.getIdToken(); 
+
         const response = await fetch("http://localhost:3000/allItems", {
-          credentials: 'include'
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {
           if (response.status === 401) {
-            throw new Error('Unauthorized');
+            throw new Error("Unauthorized");
           }
-          throw new Error('Failed to fetch items');
+          throw new Error("Failed to fetch items");
         }
 
         const data = await response.json();
@@ -33,18 +38,18 @@ const AllItemsPage = () => {
         setFilteredItems(data);
       } catch (error) {
         console.error("Error fetching items:", error);
-        if (error.message === 'Unauthorized') {
+        if (error.message === "Unauthorized") {
           Swal.fire({
-            icon: 'warning',
-            title: 'Session Expired',
-            text: 'Please login again to view items',
+            icon: "warning",
+            title: "Session Expired",
+            text: "Please login again to view items",
           });
-          navigate('/login');
+          navigate("/login");
         } else {
           Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load items',
+            icon: "error",
+            title: "Error",
+            text: "Failed to load items",
           });
         }
       } finally {
@@ -52,8 +57,12 @@ const AllItemsPage = () => {
       }
     };
 
-    fetchItems();
-  }, [navigate]);
+    if (user) {
+      fetchItems();
+    } else {
+      setLoading(false);
+    }
+  }, [navigate, user]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -69,22 +78,14 @@ const AllItemsPage = () => {
     }
   }, [searchTerm, allItems]);
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
 
   if (!loading && filteredItems.length === 0) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-5">
-        {searchTerm ? (
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
-            No items match your search
-          </h2>
-        ) : (
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
-            No items found
-          </h2>
-        )}
+        <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+          {searchTerm ? "No items match your search" : "No items found"}
+        </h2>
         {user && (
           <button
             onClick={() => navigate("/add-item")}
@@ -119,7 +120,9 @@ const AllItemsPage = () => {
             key={item._id}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 space-y-2 hover:shadow-lg transition"
           >
-            <h2 className="text-xl font-semibold dark:text-white">{item.title}</h2>
+            <h2 className="text-xl font-semibold dark:text-white">
+              {item.title}
+            </h2>
             <p className="dark:text-gray-300">
               <span className="font-semibold">Category:</span> {item.category}
             </p>
@@ -128,13 +131,14 @@ const AllItemsPage = () => {
             </p>
             <p className="dark:text-gray-300">
               <span className="font-semibold">Status:</span>{" "}
-              <span className={`font-semibold ${
-                item.postType === "Lost" ? "text-red-500" : "text-green-500"
-              }`}>
+              <span
+                className={`font-semibold ${
+                  item.postType === "Lost" ? "text-red-500" : "text-green-500"
+                }`}
+              >
                 {item.postType}
               </span>
             </p>
-
             <Link to={`/items/${item._id}`}>
               <button className="mt-2 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition">
                 View Details

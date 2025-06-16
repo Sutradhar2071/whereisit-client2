@@ -18,54 +18,36 @@ const LatestItemsSection = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await fetch("http://localhost:3000/items?sort=date_desc&limit=6", {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+
+        const response = await fetch("http://localhost:3000/items?sort=date_desc&limit=6");
 
         if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error('Unauthorized - Please login again');
-          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
+
         if (!Array.isArray(data)) {
-          throw new Error('Invalid data format received');
+          throw new Error("Invalid data format received");
         }
 
         const sorted = data.sort((a, b) => new Date(b.date) - new Date(a.date));
         setItems(sorted.slice(0, 6));
       } catch (error) {
-        console.error('Error fetching latest items:', error);
+        console.error("Error fetching latest items:", error);
         setError(error.message);
-        
-        if (error.message.includes('Unauthorized')) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Session Expired',
-            text: 'Please login again to view latest items',
-          }).then(() => {
-            navigate('/login');
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to load latest items',
-          });
-        }
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "Failed to load latest items",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchLatestItems();
-  }, [navigate]);
+  }, []);
 
   if (loading) {
     return (
@@ -79,7 +61,7 @@ const LatestItemsSection = () => {
     return (
       <div className="text-center py-10">
         <p className="text-red-500">{error}</p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
         >
@@ -108,9 +90,9 @@ const LatestItemsSection = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map(item => (
-              <div 
-                key={item._id} 
+            {items.map((item) => (
+              <div
+                key={item._id}
                 className="border rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col hover:transform hover:scale-105 duration-200"
               >
                 <div className="w-full h-48 bg-gray-200 rounded overflow-hidden">
@@ -121,8 +103,8 @@ const LatestItemsSection = () => {
                       className="w-full h-full object-cover"
                       loading="lazy"
                       onError={(e) => {
-                        e.target.src = '/placeholder-image.jpg';
-                        e.target.className = 'w-full h-full object-contain p-4';
+                        e.target.src = "/placeholder-image.jpg";
+                        e.target.className = "w-full h-full object-contain p-4";
                       }}
                     />
                   ) : (
@@ -134,8 +116,8 @@ const LatestItemsSection = () => {
 
                 <span
                   className={`inline-block mt-2 px-3 py-1 text-sm font-semibold rounded-full ${
-                    item.postType === "Lost" 
-                      ? "bg-red-100 text-red-800" 
+                    item.postType === "Lost"
+                      ? "bg-red-100 text-red-800"
                       : "bg-green-100 text-green-800"
                   }`}
                 >
@@ -171,8 +153,17 @@ const LatestItemsSection = () => {
               className="bg-gray-800 text-white py-3 px-8 rounded-lg hover:bg-gray-900 transition flex items-center gap-2"
             >
               <span>See All Lost & Found Items</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           </div>

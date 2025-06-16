@@ -38,10 +38,16 @@ const AuthProvider = ({ children }) => {
   };
 
   const updateUserProfile = (name, photoURL) => {
+    if (!auth.currentUser) return Promise.reject("No user is signed in");
     return updateProfile(auth.currentUser, {
       displayName: name,
       photoURL: photoURL,
     });
+  };
+
+  const getIdToken = async () => {
+    if (!auth.currentUser) return null;
+    return await auth.currentUser.getIdToken(/* forceRefresh */ true);
   };
 
   const saveUserAndGetToken = async (currentUser) => {
@@ -52,20 +58,23 @@ const AuthProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:3000/jwt', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/jwt", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(userInfo),
-        credentials: 'include'
+        credentials: "include",
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to get JWT token');
+        throw new Error("Failed to get JWT token");
       }
+
+      
+
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error("Error saving user:", error);
     }
   };
 
@@ -91,10 +100,13 @@ const AuthProvider = ({ children }) => {
     logOut,
     googleSignIn,
     updateUserProfile,
+    getIdToken,
   };
 
   return (
-    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={authInfo}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

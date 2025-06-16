@@ -1,43 +1,52 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProvider";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 import useTitle from "../hooks/useTitle";
 
 const MyItems = () => {
-  useTitle("WhereIsIt | My Item Page")
-  const { user } = useContext(AuthContext);
+  useTitle("WhereIsIt | My Item Page");
+  const { user, getIdToken } = useContext(AuthContext); 
   const [myItems, setMyItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.email) {
-      fetch(`http://localhost:3000/allItems`, {
-        credentials: 'include'
-      })
-        .then(res => {
-          if (res.status === 401) {
-            throw new Error('Unauthorized');
-          }
-          return res.json();
-        })
-        .then(data => {
-          const userItems = data.filter((item) => item.email === user.email);
-          setMyItems(userItems);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
-          if (err.message === 'Unauthorized') {
-            Swal.fire("Session Expired", "Please login again", "error");
-            navigate('/login');
-          }
-          setLoading(false);
+    const fetchMyItems = async () => {
+      if (!user?.email) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const token = await getIdToken();
+        const res = await fetch("http://localhost:3000/allItems", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-    }
+
+        if (res.status === 401) {
+          throw new Error("Unauthorized");
+        }
+
+        const data = await res.json();
+        const userItems = data.filter((item) => item.email === user.email);
+        setMyItems(userItems);
+      } catch (error) {
+        console.error(error);
+        if (error.message === "Unauthorized") {
+          Swal.fire("Session Expired", "Please login again", "error");
+          navigate("/login");
+        } else {
+          Swal.fire("Error", "Failed to fetch your items", "error");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyItems();
   }, [user, navigate]);
 
   const handleDelete = async (id) => {
@@ -51,56 +60,63 @@ const MyItems = () => {
       confirmButtonText: "Yes, delete it!",
     });
 
-    if (confirm.isConfirmed) {
-      try {
-        const res = await fetch(`http://localhost:3000/items/${id}`, {
-          method: "DELETE",
-          credentials: 'include'
-        });
+    if (!confirm.isConfirmed) return;
 
-        if (res.status === 401) {
-          throw new Error('Unauthorized');
-        }
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("Server Error:", errorText);
-          Swal.fire("Error", "Failed to delete the item", "error");
-          return;
-        }
+    try {
+      const token = await getIdToken();
 
-        const result = await res.json();
+      const res = await fetch(`http://localhost:3000/items/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (result.deletedCount > 0) {
-          Swal.fire("Deleted!", "Your item has been deleted.", "success");
-          setMyItems(myItems.filter((item) => item._id !== id));
-        } else {
-          Swal.fire("Not Found", "Item not found or already deleted", "info");
-        }
-      } catch (error) {
-        console.error("Delete failed:", error);
-        if (error.message === 'Unauthorized') {
-          Swal.fire("Session Expired", "Please login again", "error");
-          navigate('/login');
-        } else {
-          Swal.fire("Error", "Something went wrong!", "error");
-        }
+      if (res.status === 401) {
+        throw new Error("Unauthorized");
+      }
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Server Error:", errorText);
+        Swal.fire("Error", "Failed to delete the item", "error");
+        return;
+      }
+
+      const result = await res.json();
+
+      if (result.deletedCount > 0) {
+        Swal.fire("Deleted!", "Your item has been deleted.", "success");
+        setMyItems(myItems.filter((item) => item._id !== id));
+      } else {
+        Swal.fire("Not Found", "Item not found or already deleted", "info");
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+      if (error.message === "Unauthorized") {
+        Swal.fire("Session Expired", "Please login again", "error");
+        navigate("/login");
+      } else {
+        Swal.fire("Error", "Something went wrong!", "error");
       }
     }
   };
 
-  if (loading) return <Loading></Loading>;
+  if (loading) return <Loading />;
 
   return (
     <div className="max-w-6xl mx-auto p-5 mt-10">
-      <h2 className="text-2xl font-semibold mb-6 text-center">
-        Manage My Items
-      </h2>
+      <h2 className="text-2xl font-semibold mb-6 text-center">Manage My Items</h2>
 
       {myItems.length === 0 ? (
-        <p className="text-center text-gray-600">
-          You haven't posted any item yet.
-        </p>
+        <div className="text-center text-gray-600 space-y-4">
+          <p>You haven't posted any item yet.</p>
+          <Link to="/add-item">
+            <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Add Item
+            </button>
+          </Link>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full border">
