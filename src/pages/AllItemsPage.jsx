@@ -17,14 +17,17 @@ const AllItemsPage = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const token = await user?.getIdToken(); 
+        const token = await user?.getIdToken();
 
-        const response = await fetch("https://whereisit-server-nine.vercel.app/allItems", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://whereisit-server-nine.vercel.app/allItems",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -80,6 +83,26 @@ const AllItemsPage = () => {
 
   if (loading) return <Loading />;
 
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-5 text-center">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+          Sorry, you must be logged in to view this page.
+        </h2>
+        <p className="mb-6 text-gray-600 dark:text-gray-400">
+          Please login so you can view all lost and found items and take necessary actions.
+        </p>
+        <button
+          onClick={() => navigate("/login")}
+          className="px-6 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition"
+        >
+          Login
+        </button>
+      </div>
+    );
+  }
+
   if (!loading && filteredItems.length === 0) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-5">
@@ -120,9 +143,7 @@ const AllItemsPage = () => {
             key={item._id}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 space-y-2 hover:shadow-lg transition"
           >
-            <h2 className="text-xl font-semibold dark:text-white">
-              {item.title}
-            </h2>
+            <h2 className="text-xl font-semibold dark:text-white">{item.title}</h2>
             <p className="dark:text-gray-300">
               <span className="font-semibold">Category:</span> {item.category}
             </p>
