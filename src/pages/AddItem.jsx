@@ -35,10 +35,9 @@ const AddItem = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Token দিয়ে Authorization header যোগ করা হলো
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newItem),
-        // credentials: 'include', // যদি cookie-based auth দরকার হয়
       });
 
       if (res.status === 401) {

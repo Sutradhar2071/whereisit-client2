@@ -4,6 +4,7 @@ import ExtraSectionTwo from './ExtraSectionTwo';
 import HeroSection from './HeroSection';
 import LatestItemsSection from './LatestItemsSection';
 import useTitle from "../hooks/useTitle";
+import NewsletterSection from './NewsletterSection';
 
 const Home = () => {
     useTitle("WhereIsIt | Home")
@@ -13,6 +14,7 @@ const Home = () => {
             <LatestItemsSection></LatestItemsSection>
             <ExtraSectionOne></ExtraSectionOne>
             <ExtraSectionTwo></ExtraSectionTwo>
+            <NewsletterSection></NewsletterSection>
         </div>
     );
 };

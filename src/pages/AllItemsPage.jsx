@@ -11,6 +11,7 @@ const AllItemsPage = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortKey, setSortKey] = useState("title"); // title or location
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
@@ -68,22 +69,30 @@ const AllItemsPage = () => {
   }, [navigate, user]);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredItems(allItems);
-    } else {
+    let tempItems = allItems;
+
+    // Filter by search term
+    if (searchTerm.trim() !== "") {
       const lowerTerm = searchTerm.toLowerCase();
-      const filtered = allItems.filter(
+      tempItems = tempItems.filter(
         (item) =>
           item.title.toLowerCase().includes(lowerTerm) ||
           item.location.toLowerCase().includes(lowerTerm)
       );
-      setFilteredItems(filtered);
     }
-  }, [searchTerm, allItems]);
+
+    // Sort by key
+    tempItems = [...tempItems].sort((a, b) => {
+      const aVal = a[sortKey]?.toLowerCase() || "";
+      const bVal = b[sortKey]?.toLowerCase() || "";
+      return aVal.localeCompare(bVal);
+    });
+
+    setFilteredItems(tempItems);
+  }, [searchTerm, allItems, sortKey]);
 
   if (loading) return <Loading />;
 
-  
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-5 text-center">
@@ -103,31 +112,13 @@ const AllItemsPage = () => {
     );
   }
 
-  if (!loading && filteredItems.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-5">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
-          {searchTerm ? "No items match your search" : "No items found"}
-        </h2>
-        {user && (
-          <button
-            onClick={() => navigate("/add-item")}
-            className="px-6 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition"
-          >
-            Add new item
-          </button>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-5">
       <h1 className="text-3xl font-bold text-center text-violet-600 mb-6">
         All Lost & Found Items
       </h1>
 
-      <div className="max-w-md mx-auto mb-6">
+      <div className="max-w-md mx-auto mb-6 flex flex-col gap-3">
         <input
           type="text"
           placeholder="Search by title or location..."
@@ -135,39 +126,76 @@ const AllItemsPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:bg-gray-800 dark:text-white"
         />
+
+        <select
+          value={sortKey}
+          onChange={(e) => setSortKey(e.target.value)}
+          className="w-full px-4 py-2 rounded border border-gray-300 dark:bg-gray-800 dark:text-white"
+        >
+          <option value="title">Sort by Title</option>
+          <option value="location">Sort by Location</option>
+        </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 space-y-2 hover:shadow-lg transition"
-          >
-            <h2 className="text-xl font-semibold dark:text-white">{item.title}</h2>
-            <p className="dark:text-gray-300">
-              <span className="font-semibold">Category:</span> {item.category}
-            </p>
-            <p className="dark:text-gray-300">
-              <span className="font-semibold">Location:</span> {item.location}
-            </p>
-            <p className="dark:text-gray-300">
-              <span className="font-semibold">Status:</span>{" "}
-              <span
-                className={`font-semibold ${
-                  item.postType === "Lost" ? "text-red-500" : "text-green-500"
-                }`}
-              >
-                {item.postType}
-              </span>
-            </p>
-            <Link to={`/items/${item._id}`}>
-              <button className="mt-2 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition">
-                View Details
-              </button>
-            </Link>
-          </div>
-        ))}
-      </div>
+      {filteredItems.length === 0 ? (
+        <p className="text-center text-gray-700 dark:text-gray-300">No items found.</p>
+      ) : (
+        <div className="overflow-x-auto rounded shadow-md bg-white dark:bg-gray-800">
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-violet-100 dark:bg-violet-900">
+                <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                  Title
+                </th>
+                <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                  Category
+                </th>
+                <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                  Location
+                </th>
+                <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                  Status
+                </th>
+                <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((item) => (
+                <tr
+                  key={item._id}
+                  className="hover:bg-violet-50 dark:hover:bg-violet-700 cursor-pointer"
+                >
+                  <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:text-white">
+                    {item.title}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:text-gray-300">
+                    {item.category}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:text-gray-300">
+                    {item.location}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 font-semibold">
+                    <span
+                      className={`${
+                        item.postType === "Lost" ? "text-red-600" : "text-green-600"
+                      }`}
+                    >
+                      {item.postType}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 text-right">
+                    <Link to={`/items/${item._id}`}>
+                      <button className="px-3 py-1 bg-violet-600 text-white rounded hover:bg-violet-700 transition">
+                        View Details
+                      </button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

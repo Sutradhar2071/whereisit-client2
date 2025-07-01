@@ -28,7 +28,6 @@ const UpdateItem = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          // credentials: "include",
         });
 
         if (res.status === 401) {
@@ -86,7 +85,6 @@ const UpdateItem = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updatedItem),
-        // credentials: "include",
       });
 
       if (res.status === 401) {
