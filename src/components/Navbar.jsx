@@ -35,18 +35,20 @@ const Navbar = () => {
           Home
         </NavLink>
       </li>
-      <li>
-        <NavLink
-          to="/lost-found-items"
-          className={({ isActive }) =>
-            isActive
-              ? "text-primary font-semibold underline"
-              : "hover:underline"
-          }
-        >
-          Lost & Found Items
-        </NavLink>
-      </li>
+      {user && (
+        <li>
+          <NavLink
+            to="/lost-found-items"
+            className={({ isActive }) =>
+              isActive
+                ? "text-primary font-semibold underline"
+                : "hover:underline"
+            }
+          >
+            Lost & Found Items
+          </NavLink>
+        </li>
+      )}
     </>
   );
 
