@@ -29,25 +29,45 @@ const AnimatedText = ({ text }) => {
 const ExtraSectionOne = () => {
   return (
     <section
-      className="bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100
-                 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
-                 p-10 rounded-2xl my-10 shadow-lg
+      className="bg-violet-50 dark:bg-gray-800 
+                 p-10 rounded-3xl my-12 shadow-xl
+                 border border-gray-200 dark:border-gray-700
                  transition-colors duration-500 ease-in-out"
       role="region"
       aria-label="Why use WhereIsIt section"
     >
-      <h2 className="text-3xl font-extrabold text-violet-700 dark:text-white mb-4 animate-fade-in-up">
-        Why Use{" "}
-        <AnimatedText text="WhereIsIt?" />
+      {/* Title */}
+      <h2 className="text-4xl font-extrabold text-center text-violet-700 dark:text-white mb-6">
+        Why Use <AnimatedText text="WhereIsIt?" />
       </h2>
-      <p className="text-base text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide">
-        Whether you've lost something valuable or found something someone might be missing —{" "}
+
+      {/* Divider */}
+      <div className="w-24 h-1 bg-violet-500 mx-auto mb-8 rounded-full"></div>
+
+      {/* Content */}
+      <p className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed tracking-wide text-center">
+        Whether you've lost something valuable or found something someone might
+        be missing —{" "}
         <span className="font-semibold text-violet-600 dark:text-violet-400">
           WhereIsIt
         </span>{" "}
-        makes it fast, secure, and community-powered to get it back. Join our trustworthy platform
-        where every item counts!
+        makes it <span className="font-semibold">fast</span>,{" "}
+        <span className="font-semibold">secure</span>, and{" "}
+        <span className="font-semibold">community-powered</span> to get it back.
+        Join our trustworthy platform where every item counts!
       </p>
+
+      {/* Call to Action */}
+      <div className="mt-8 flex justify-center">
+        <a
+          href="https://ringku-sd-codesign.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-6 py-3 bg-violet-600 text-white rounded-full hover:bg-violet-700 shadow-md transition-transform transform hover:scale-105"
+        >
+          Get Started
+        </a>
+      </div>
     </section>
   );
 };
