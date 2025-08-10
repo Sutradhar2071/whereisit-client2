@@ -10,9 +10,13 @@ const RecoveredItemsPage = () => {
   useTitle("WhereIsIt | Recovered Items Page");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user, getIdToken } = useContext(AuthContext); 
+  const { user, getIdToken } = useContext(AuthContext);
   const [isGridLayout, setIsGridLayout] = useState(true);
   const navigate = useNavigate();
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     if (!user?.email) {
@@ -23,7 +27,6 @@ const RecoveredItemsPage = () => {
     async function fetchRecoveredItems() {
       setLoading(true);
       try {
-        
         const token = await getIdToken();
 
         const res = await fetch(
@@ -31,7 +34,7 @@ const RecoveredItemsPage = () => {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-            }
+            },
           }
         );
 
@@ -59,9 +62,22 @@ const RecoveredItemsPage = () => {
     }
 
     fetchRecoveredItems();
-  }, [user, navigate]);
+  }, [user, navigate, getIdToken]);
 
   if (loading) return <Loading />;
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+
+  const paginate = (pageNumber) => {
+    if(pageNumber < 1) pageNumber = 1;
+    else if(pageNumber > totalPages) pageNumber = totalPages;
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-10">
@@ -105,7 +121,7 @@ const RecoveredItemsPage = () => {
         </p>
       ) : isGridLayout ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {currentItems.map((item) => (
             <div
               key={item._id}
               className="border rounded-lg p-4 shadow hover:shadow-lg transition"
@@ -138,7 +154,7 @@ const RecoveredItemsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {currentItems.map((item) => (
                 <tr key={item._id} className="border-t">
                   <td className="px-4 py-2">{item.originalItem?.title}</td>
                   <td className="px-4 py-2">{item.recoveredLocation}</td>
@@ -152,6 +168,44 @@ const RecoveredItemsPage = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {items.length > itemsPerPage && (
+        <div className="flex justify-center items-center mt-8 space-x-3">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-600 transition"
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => paginate(pageNum)}
+                className={`px-4 py-2 rounded ${
+                  currentPage === pageNum
+                    ? "bg-blue-600 text-white shadow"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-600 transition"
+          >
+            Next
+          </button>
         </div>
       )}
     </section>
