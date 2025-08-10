@@ -12,8 +12,11 @@ const AllItemsPage = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortKey, setSortKey] = useState("title"); // title or location
-  const [viewType, setViewType] = useState("table"); // table or card
+  const [sortKey, setSortKey] = useState("title");
+  const [viewType, setViewType] = useState("table");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
@@ -21,7 +24,6 @@ const AllItemsPage = () => {
     const fetchItems = async () => {
       try {
         const token = await user?.getIdToken();
-
         const response = await fetch(
           "https://whereisit-server-nine.vercel.app/allItems",
           {
@@ -89,7 +91,12 @@ const AllItemsPage = () => {
     });
 
     setFilteredItems(tempItems);
+    setCurrentPage(1); // reset to first page on new search/sort
   }, [searchTerm, allItems, sortKey]);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   if (loading) return <Loading />;
 
@@ -118,7 +125,6 @@ const AllItemsPage = () => {
         <h1 className="text-3xl font-bold text-violet-600">
           All Lost & Found Items
         </h1>
-        {/* Toggle View Button */}
         <button
           onClick={() => setViewType(viewType === "table" ? "card" : "table")}
           className="p-2 bg-violet-600 text-white rounded hover:bg-violet-700"
@@ -136,7 +142,6 @@ const AllItemsPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:bg-gray-800 dark:text-gray-200"
         />
-
         <select
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value)}
@@ -150,7 +155,6 @@ const AllItemsPage = () => {
       {filteredItems.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-gray-400">No items found.</p>
       ) : viewType === "table" ? (
-        /* TABLE VIEW */
         <div className="overflow-x-auto rounded shadow-md bg-white dark:bg-gray-800">
           <table className="min-w-full table-auto border-collapse">
             <thead>
@@ -163,7 +167,7 @@ const AllItemsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((item) => (
+              {currentItems.map((item) => (
                 <tr key={item._id} className="hover:bg-violet-50 dark:hover:bg-violet-700">
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{item.title}</td>
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{item.category}</td>
@@ -186,9 +190,8 @@ const AllItemsPage = () => {
           </table>
         </div>
       ) : (
-        /* CARD VIEW */
         <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredItems.map((item) => (
+          {currentItems.map((item) => (
             <div
               key={item._id}
               className="bg-white dark:bg-gray-800 rounded shadow p-4 flex flex-col justify-between"
@@ -213,6 +216,39 @@ const AllItemsPage = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 rounded ${
+                currentPage === i + 1
+                  ? "bg-violet-600 text-white"
+                  : "bg-gray-300 dark:bg-gray-700"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
