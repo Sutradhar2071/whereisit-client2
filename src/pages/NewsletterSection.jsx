@@ -16,13 +16,14 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section className="bg-white rounded-3xl shadow-lg dark:bg-gray-900 py-16 px-6 sm:px-10">
+    <section className="bg-white rounded-3xl shadow-lg mx-auto max-w-10/12 dark:bg-gray-900 py-16 px-6 sm:px-10">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-violet-700 dark:text-violet-300 mb-4">
           Subscribe to Our Newsletter
         </h2>
         <p className="text-gray-700 dark:text-gray-300 mb-8">
-          Get the latest updates, tips, and lost & found stories delivered to your inbox.
+          Get the latest updates, tips, and lost & found stories delivered to
+          your inbox.
         </p>
 
         <form

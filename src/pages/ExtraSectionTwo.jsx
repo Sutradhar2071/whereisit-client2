@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 const ExtraSectionTwo = () => {
-  const linkedinUrl = "https://www.linkedin.com/in/ringku-sutradhar-8461002aa/";
+  const linkedinUrl = "https://www.linkedin.com/in/ringku-sutradhar";
 
   return (
     <section

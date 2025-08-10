@@ -31,6 +31,8 @@ const ExtraSectionOne = () => {
     <section
       className="bg-violet-50 dark:bg-gray-800 
                  p-10 rounded-3xl my-12 shadow-xl
+                 max-w-11/12
+                 mx-auto
                  border border-gray-200 dark:border-gray-700
                  transition-colors duration-500 ease-in-out"
       role="region"
