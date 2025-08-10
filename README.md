@@ -3,7 +3,7 @@
 A user-friendly platform to help users post, track, and find lost or found items. This project is part of the Assignment 11 from Programming Hero Web Dev course.
 
 ### 🔗 Live Website
-https://whereisit-61ba5.web.app/
+https://helpful-dusk-346069.netlify.app/
 
 ---
 
